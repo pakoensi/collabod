@@ -1,20 +1,70 @@
 import { v } from "convex/values";
+import {getAllOrThrow} from "convex-helpers/server/relationships"
 import { query } from "./_generated/server";
+import { favorite } from "./board";
 
 export const get = query({
     args:{
         orgId:v.string(),
+        search:v.optional(v.string()),
+        favorites:v.optional(v.string())
     },
     handler:async(ctx,args)=>{
         const identity = await ctx.auth.getUserIdentity();
         if(!identity){
             throw new Error("Unauthorized")
         }
-        const boards = await ctx.db.query("board")
-        .withIndex("by_org",(q)=>q.eq("orgId",args.orgId))
-        .order("desc")
-        .collect();
 
-        return boards
+        if(args.favorites){
+            const favoritedBoard = await ctx.db.query("userFavorites")
+            .withIndex("by_user_org",(q)=>
+                q.eq("userId",identity.subject)
+            .eq("orgId",args.orgId)
+            )
+            .order("desc")
+            .collect()
+
+            const ids = favoritedBoard.map((b)=>b.boardId);
+            const boards = await getAllOrThrow(ctx.db,ids)
+            return boards.map((board)=>({
+                ...board,
+                isFavorite:true
+            }))
+            
+        }
+
+        const title = args.search as string
+        let boards:any[] = []
+        if(title){
+            // ToDO :Search Index
+            boards = await ctx.db.query("board")
+            .withSearchIndex("search_title",(q)=>
+                q.search("title",title)
+            .eq("orgId",args.orgId)
+            ).collect()
+        }else{
+
+             boards = await ctx.db.query("board")
+            .withIndex("by_org",(q)=>q.eq("orgId",args.orgId))
+            .order("desc")
+            .collect();
+        }
+
+
+        const boardsWithFaoriteRelation = boards.map((board)=>{
+            return ctx.db
+            .query("userFavorites")
+            .withIndex("by_user_board",(q)=>
+            q.eq("userId",identity.subject)
+        .eq("boardId",board._id))
+        .unique()
+        .then((favorite)=>{
+            return {
+                ...board,isFavorite:!!favorite
+            }
+        })
+        })
+const boardsWithFavoriteBoolean = Promise.all(boardsWithFaoriteRelation)
+        return boardsWithFavoriteBoolean
     }
 })
