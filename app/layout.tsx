@@ -5,6 +5,7 @@ import { ConvexClientProvider } from "@/providers/convex-client-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ModalProvider } from "@/providers/modal-provider";
 import { LiveblocksClientProvider } from "@/providers/live-blocks-providers";
+import { Suspense } from "react";
 
 
 const geistSans = Geist({
@@ -34,12 +35,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
        
+        <Suspense>
 
         <ConvexClientProvider>
           <Toaster/>
     <ModalProvider />
         {children}
         </ConvexClientProvider>
+        </Suspense>
         
       </body>
     </html>

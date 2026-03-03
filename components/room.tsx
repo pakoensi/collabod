@@ -21,7 +21,9 @@ export function Room({ children,roomId,fallback }:RoomProps ) {
   }}
       initialPresence={{
         cursor:null,
-        selection:[]
+        selection:[],
+        pencilDraft:[],
+        penColor:null
       }} 
       >
         <ClientSideSuspense fallback={fallback}>
