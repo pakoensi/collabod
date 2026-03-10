@@ -1,6 +1,8 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+
+const  ORG_BOARD_LIMIT=2; 
 const images = [
   "/placeholders/1.svg",
   "/placeholders/2.svg",
@@ -34,6 +36,12 @@ export const create = mutation({
     }
 
     const randomImage = images[Math.floor(Math.random() * images.length)];
+
+    const exisitingBoardsCount = await ctx.db.query("board").withIndex("by_org",(q)=>q.eq("orgId",args.orgId)).collect()
+    if(exisitingBoardsCount.length>=ORG_BOARD_LIMIT){
+      throw new Error("Organization Limit Reached")
+    }
+
     const board = await ctx.db.insert("board", {
       title: args.title,
       orgId: args.orgId,
