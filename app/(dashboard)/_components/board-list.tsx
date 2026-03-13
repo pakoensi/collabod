@@ -8,6 +8,7 @@ import { EmptySearch } from "./empty-search"
 import { api } from "@/convex/_generated/api"
 import { BoardCard } from "./board-card"
 import { NewBoardButton } from "./new-board-button"
+import { useAuth } from "@clerk/nextjs"
 
 interface BoardListProps{
   orgId:string
@@ -18,7 +19,17 @@ interface BoardListProps{
 }
 
 export const BoardList=({orgId,query}:BoardListProps)=>{
-    const data =useQuery(api.boards.get,{orgId, ...query})
+    // const data =useQuery(api.boards.get,{orgId, ...query})
+    const { isLoaded } = useAuth()
+
+  const data = useQuery(
+    api.boards.get,
+    isLoaded ? { orgId, ...query } : "skip"
+  )
+
+  if (!isLoaded) {
+    return <div className="p-6"><EmptySearch/></div>
+  }
 
     if(data===undefined){
         return(<div>

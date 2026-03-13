@@ -18,25 +18,35 @@ const convex = new ConvexReactClient(
   process.env.NEXT_PUBLIC_CONVEX_URL!
 )
 
+// export const ConvexClientProvider = ({ children }: ConvexClientProviderProps) => {
+//   return (
+//     <ClerkProvider>
+//       <ConvexProviderWithClerk useAuth={useAuth} client={convex}>
+        
+//         <AuthLoading>
+//           <Loading />
+//         </AuthLoading>
+
+//         <Authenticated>
+//           {children}
+//         </Authenticated>
+
+//         <Unauthenticated>
+//           <div className="min-h-screen flex items-center justify-center">
+//             <SignIn />
+//           </div>
+//         </Unauthenticated>
+
+//       </ConvexProviderWithClerk>
+//     </ClerkProvider>
+//   )
+// }
+
 export const ConvexClientProvider = ({ children }: ConvexClientProviderProps) => {
   return (
     <ClerkProvider>
       <ConvexProviderWithClerk useAuth={useAuth} client={convex}>
-        
-        <AuthLoading>
-          <Loading />
-        </AuthLoading>
-
-        <Authenticated>
-          {children}
-        </Authenticated>
-
-        <Unauthenticated>
-          <div className="min-h-screen flex items-center justify-center">
-            <SignIn />
-          </div>
-        </Unauthenticated>
-
+        {children}
       </ConvexProviderWithClerk>
     </ClerkProvider>
   )
